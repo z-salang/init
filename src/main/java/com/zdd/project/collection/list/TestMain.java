@@ -1,8 +1,5 @@
 package com.zdd.project.collection.list;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * <p>
  *
@@ -12,9 +9,6 @@ import java.util.List;
 public class TestMain {
 
     public static void main(String[] args) {
-        List<Integer> list = new ArrayList<>();
-        for (int i : list) {
-            System.out.println(i);
-        }
+
     }
 }
