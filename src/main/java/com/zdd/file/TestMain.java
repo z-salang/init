@@ -12,7 +12,7 @@ public class TestMain {
 
     public static void main(String[] args) throws IOException {
         ReadFileEngine engine = new ReadFileEngine();
-        engine.start("/Users/zdd/Desktop/UE__209484.csv");
+        engine.start("/Users/zdd/data_amind/test.sql");
     }
 
 }

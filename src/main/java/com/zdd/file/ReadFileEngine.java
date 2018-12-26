@@ -1,14 +1,10 @@
 package com.zdd.file;
 
-import com.zdd.project.number.UnsignedAndSignedTrans;
-import com.zdd.project.timezone.TimeUtil;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.time.LocalDateTime;
 
 /**
  * <p>
@@ -21,10 +17,9 @@ public class ReadFileEngine {
     private static final String SINGLE_QUOTES = "'";
     private static final String COMMA = ",";
 
-    private static final String SQL_INSERT_TITLE = "insert into click_chargelog20180918( srch_id ," +
-            " click_id , version , bid , price , type , click_time , userid , packid , unitid , ideaid ," +
-            " interestid , regionid , platform , srch_time , show_time , media_id , slot_id , ad_resource_id , " +
-            "ghost_pack_id , create_time , business , group_id , campaign_id , creative_id ) values";
+    private static final String SQL_INSERT_TITLE = "insert into charged_log20181225(account_id,element_id,business,charge_id,price,type,charge_version,product,occur_time,created_on) values";
+
+    private static final int BLOB_SIZE = 3;
 
     private FileReader fileReader;
     private BufferedReader bufferedReader;
@@ -41,17 +36,32 @@ public class ReadFileEngine {
     }
 
     private void readFile() throws IOException {
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(SQL_INSERT_TITLE);
+        StringBuilder stringBuilder = buildSqlStatement();
 
+        int blobCounter = 1;
         String line;
         while (null != (line = bufferedReader.readLine())) {
+            if (blobCounter > BLOB_SIZE) {
+                String wholeSql = stringBuilder.toString().substring(0, stringBuilder.length() - 1) + ";";
+                System.out.println(wholeSql);
+
+                stringBuilder = buildSqlStatement();
+                blobCounter=1;
+            }
+
             String sqlValue = transToSQLValue(line);
             stringBuilder.append(sqlValue);
+            ++blobCounter;
         }
 
-        String wholeSql = stringBuilder.toString().substring(0, stringBuilder.length() - 1);
+        String wholeSql = stringBuilder.toString().substring(0, stringBuilder.length() - 1) + ";";
         System.out.println(wholeSql);
+    }
+
+    private StringBuilder buildSqlStatement() {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(SQL_INSERT_TITLE);
+        return stringBuilder;
     }
 
     private String transToSQLValue(String line) {
@@ -66,7 +76,7 @@ public class ReadFileEngine {
         for (int i = 0; i < values.length; ++i) {
             String value = values[i];
 
-            if (i == 6 || i == 14 || i == 15 || i == 20) {
+            if (i == 2 || i == 5 || i == 7 || i == 9) {
                 stringBuilder.append(SINGLE_QUOTES).append(value).append(SINGLE_QUOTES).append(COMMA);
             } else {
                 stringBuilder.append(value).append(COMMA);
@@ -80,18 +90,18 @@ public class ReadFileEngine {
     }
 
     private void convert(String[] values) {
-        values[0] = String.valueOf(UnsignedAndSignedTrans.unsignedToSigned(values[0])); // srch_id
-        values[1] = String.valueOf(UnsignedAndSignedTrans.unsignedToSigned(values[1])); // click_id
-
-        long clickTimeStamp = Long.valueOf(values[6]) / 1000;
-        LocalDateTime clickDateTime = TimeUtil.ofEpochMillis(clickTimeStamp);
-        values[6] = clickDateTime.format(TimeUtil.MILLIS_FORMATTER);
-
-        long srchTimeStamp = Long.valueOf(values[14]) / 1000;
-        LocalDateTime srchDateTime = TimeUtil.ofEpochMillis(srchTimeStamp);
-        values[14] = srchDateTime.format(TimeUtil.MILLIS_FORMATTER);
-
-        values[20] = LocalDateTime.now().format(TimeUtil.MILLIS_FORMATTER);
+//        values[0] = String.valueOf(UnsignedAndSignedTrans.unsignedToSigned(values[2])); // srch_id
+//        values[1] = String.valueOf(UnsignedAndSignedTrans.unsignedToSigned(values[1])); // click_id
+//
+//        long clickTimeStamp = Long.valueOf(values[6]) / 1000;
+//        LocalDateTime clickDateTime = TimeUtil.ofEpochMillis(clickTimeStamp);
+//        values[6] = clickDateTime.format(TimeUtil.MILLIS_FORMATTER);
+//
+//        long srchTimeStamp = Long.valueOf(values[14]) / 1000;
+//        LocalDateTime srchDateTime = TimeUtil.ofEpochMillis(srchTimeStamp);
+//        values[14] = srchDateTime.format(TimeUtil.MILLIS_FORMATTER);
+//
+//        values[20] = LocalDateTime.now().format(TimeUtil.MILLIS_FORMATTER);
     }
 
     private void initIO(String filePath) {
