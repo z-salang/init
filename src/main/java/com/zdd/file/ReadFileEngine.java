@@ -1,9 +1,11 @@
 package com.zdd.file;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 
 /**
@@ -17,12 +19,15 @@ public class ReadFileEngine {
     private static final String SINGLE_QUOTES = "'";
     private static final String COMMA = ",";
 
-    private static final String SQL_INSERT_TITLE = "insert into charged_log20181225(account_id,element_id,business,charge_id,price,type,charge_version,product,occur_time,created_on) values";
+    private static final String SQL_INSERT_TITLE = "insert into charged_log20181226(account_id,element_id,business,charge_id,price,type,charge_version,product,occur_time,created_on) values";
 
-    private static final int BLOB_SIZE = 3;
+    private static final int BLOB_SIZE = 500;
 
     private FileReader fileReader;
     private BufferedReader bufferedReader;
+
+    private FileWriter fileWriter;
+    private BufferedWriter bufferedWriter;
 
     public void start(String filePath) {
         try {
@@ -43,7 +48,8 @@ public class ReadFileEngine {
         while (null != (line = bufferedReader.readLine())) {
             if (blobCounter > BLOB_SIZE) {
                 String wholeSql = stringBuilder.toString().substring(0, stringBuilder.length() - 1) + ";";
-                System.out.println(wholeSql);
+                bufferedWriter.write(wholeSql);
+                bufferedWriter.newLine();
 
                 stringBuilder = buildSqlStatement();
                 blobCounter=1;
@@ -55,7 +61,9 @@ public class ReadFileEngine {
         }
 
         String wholeSql = stringBuilder.toString().substring(0, stringBuilder.length() - 1) + ";";
-        System.out.println(wholeSql);
+        bufferedWriter.write(wholeSql);
+        bufferedWriter.newLine();
+        bufferedWriter.flush();
     }
 
     private StringBuilder buildSqlStatement() {
@@ -65,7 +73,7 @@ public class ReadFileEngine {
     }
 
     private String transToSQLValue(String line) {
-        String[] values = line.split(",");
+        String[] values = line.split("\t");
         convert(values);
         return toSqlValue(values);
     }
@@ -109,8 +117,14 @@ public class ReadFileEngine {
             File file = new File(filePath);
             fileReader = new FileReader(file);
             bufferedReader = new BufferedReader(fileReader);
+
+            File outFile = new File(file.getParent() + "/" + "blob_insert.sql");
+            fileWriter = new FileWriter(outFile);
+            bufferedWriter = new BufferedWriter(fileWriter);
         } catch (FileNotFoundException e) {
             throw new RuntimeException(filePath + " is not exists ...");
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -119,6 +133,14 @@ public class ReadFileEngine {
             try {
                 bufferedReader.close();
             } catch (IOException e) {
+            }
+        }
+
+        if (bufferedWriter != null) {
+            try {
+                bufferedWriter.close();
+            } catch (IOException e) {
+
             }
         }
     }
