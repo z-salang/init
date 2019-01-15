@@ -31,6 +31,16 @@ public class Client {
         long retrievalTime = System.currentTimeMillis() - start;
         System.out.println("all cost after price returned : " + retrievalTime + "millis");
 
+
+        try {
+            Future<Double> future1 = shop.getPriceAsync2("My Favorite");
+            System.out.println("get Price "+ future1.get());
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+
     }
 
     public static void doSomethingElse(){

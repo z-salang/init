@@ -24,7 +24,7 @@ public class Shop {
 
     public static void delay(){
         try {
-            Thread.sleep(1000L);
+            Thread.sleep(2000L);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -42,6 +42,10 @@ public class Shop {
             future.complete(price);
         }).start();
         return future;
+    }
+
+    public Future<Double> getPriceAsync2(String product) {
+        return CompletableFuture.supplyAsync(() -> calculatePrice(product));
     }
 
     public String getName() {

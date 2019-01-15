@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
@@ -24,7 +25,7 @@ public class TestComposite {
         List<CompletableFuture<Double>> futures = shops.stream().map(shop -> CompletableFuture.supplyAsync(() -> shop.getPrice("product")))
                 .collect(toList());
 
-        List<Double> doubles = futures.stream().map(future -> {
+        List<Double> doubleList1 = futures.stream().map(future -> {
             Double a = new Double(0);
 
             try {
@@ -36,6 +37,9 @@ public class TestComposite {
             }
         }).collect(toList());
 
-        System.out.println(doubles);
+        System.out.println(doubleList1);
+
+        List<Double> doubleList2 = futures.stream().map(CompletableFuture::join).collect(Collectors.toList());
+        System.out.println(doubleList2);
     }
 }
